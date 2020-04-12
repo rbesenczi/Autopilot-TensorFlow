@@ -1,7 +1,11 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+from PIL import Image
 import scipy.misc
 import model
 import cv2
+import sys
+import numpy
 from subprocess import call
 
 sess = tf.InteractiveSession()
@@ -13,10 +17,11 @@ rows,cols = img.shape
 
 smoothed_angle = 0
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(sys.argv[1])
 while(cv2.waitKey(10) != ord('q')):
     ret, frame = cap.read()
-    image = scipy.misc.imresize(frame, [66, 200]) / 255.0
+    #image = scipy.misc.imresize(frame, [66, 200]) / 255.0
+    image = numpy.array(Image.fromarray(frame).resize([200,66])) / 255.0
     degrees = model.y.eval(feed_dict={model.x: [image], model.keep_prob: 1.0})[0][0] * 180 / scipy.pi
     call("clear")
     print("Predicted steering angle: " + str(degrees) + " degrees")
